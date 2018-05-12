@@ -5,9 +5,13 @@
  */
 package networkscanner;
 
+import it.sauronsoftware.ftp4j.FTPAbortedException;
 import it.sauronsoftware.ftp4j.FTPClient;
+import it.sauronsoftware.ftp4j.FTPDataTransferException;
 import it.sauronsoftware.ftp4j.FTPException;
+import it.sauronsoftware.ftp4j.FTPFile;
 import it.sauronsoftware.ftp4j.FTPIllegalReplyException;
+import it.sauronsoftware.ftp4j.FTPListParseException;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -21,6 +25,7 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -30,7 +35,7 @@ import java.util.logging.Logger;
  * @author Isa
  */
 public class NetworkScanner implements Runnable{
-    
+    static public FTPClient client = new FTPClient();
     static private List<Device> connected_devices = new ArrayList<>(); 
     static private List<Integer> open_ports = new ArrayList<>(); 
     
@@ -40,7 +45,7 @@ public class NetworkScanner implements Runnable{
     static InetAddress localHost; 
     static String subnetMask; 
     static String ip_prefix_to_scan; 
-
+    static String networkName; 
     
     int lastBytesOfIp; 
     int port; 
@@ -72,7 +77,7 @@ public class NetworkScanner implements Runnable{
     @Override
     public void run(){
         if (this.state == "ipscanner"){
-            ScanPureJava("192.168.0.");
+            ScanPureJava(ip_prefix_to_scan);
         } 
         else if (this.state == "portscanner"){
             try { 
@@ -183,17 +188,32 @@ public class NetworkScanner implements Runnable{
     }
     
     public void ScanFTP(String ip) throws UnknownHostException, IOException, IllegalStateException, FTPIllegalReplyException{
-        FTPClient client = new FTPClient();
+       
         try { 
             client.connect(ip);
-            client.login("pi", "raspberry"); 
-            System.out.println("connected to ftp server on " + ip); 
+            //client.login("user", "password"); 
+            System.out.println("found ftp server on " + ip); 
         } catch (FTPException ex) {
             Logger.getLogger(NetworkScanner.class.getName()).log(Level.SEVERE, null, ex);
             
         }
     }
     
+   /* public void LoginFTP(String usr, String pass, String ip) throws IllegalStateException, IOException, FTPIllegalReplyException, FTPException{
+        FTPClient client = new FTPClient();
+        client.connect(ip);
+        client.login(usr, ip);
+        try {
+            FTPFile[] list = client.list();
+        } catch (FTPDataTransferException ex) {
+            Logger.getLogger(NetworkScanner.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (FTPAbortedException ex) {
+            Logger.getLogger(NetworkScanner.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (FTPListParseException ex) {
+            Logger.getLogger(NetworkScanner.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    */
     
     public Boolean HasNoneOpenPorts(){
         return open_ports.isEmpty(); 
@@ -203,7 +223,7 @@ public class NetworkScanner implements Runnable{
         return open_ports; 
     }
     
-    public void InitLocalHost() throws SocketException, UnknownHostException{
+    public void InitNetwork() throws SocketException, UnknownHostException{
         //read localhost into variable 
         localHost = Inet4Address.getLocalHost(); 
         NetworkInterface networkInterface = NetworkInterface.getByInetAddress(localHost); 
@@ -212,9 +232,9 @@ public class NetworkScanner implements Runnable{
             subnetMask = "255.255.255"; 
         }
         else{
-            //too many IPs to scan
+            System.out.println("too many IPs to scan"); 
         }
-        
+        StripLocalHost(); 
     }
     
     public String getSubnetMask(){
@@ -225,13 +245,13 @@ public class NetworkScanner implements Runnable{
         return localHost; 
     }
     
-    public static void StripLocalHost() throws UnknownHostException{
-         InetAddress lh = Inet4Address.getLocalHost(); 
-         System.out.println(lh.getByAddress(lh.getAddress())); 
+    public void StripLocalHost() throws UnknownHostException{
+         String ipAddress  = localHost.getHostAddress();
+         ipAddress = ipAddress.substring(0, ipAddress.lastIndexOf('.')) + ".";
+         ip_prefix_to_scan = ipAddress; 
     }
     
-    public static void main(String[]args) throws UnknownHostException{
-        StripLocalHost(); 
+    public static void main(String[] args) throws IOException{
+        
     }
-    
 }
