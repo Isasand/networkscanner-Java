@@ -5,18 +5,26 @@
  */
 package networkscanner;
 
+import it.sauronsoftware.ftp4j.FTPClient;
+import it.sauronsoftware.ftp4j.FTPException;
+import it.sauronsoftware.ftp4j.FTPIllegalReplyException;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.InterfaceAddress;
+import java.net.NetworkInterface;
 import java.net.Socket;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 /**
  *
  * @author Isa
@@ -28,9 +36,16 @@ public class NetworkScanner implements Runnable{
     
     static String state = "ipscanner"; 
     static String ip_to_scan; 
-        
+    static int networkPrefixLenght; 
+    static InetAddress localHost; 
+    static String subnetMask; 
+    static String ip_prefix_to_scan; 
+
+    
     int lastBytesOfIp; 
     int port; 
+    
+    
     
     public NetworkScanner(int var, String ip, int port){
         this.lastBytesOfIp = var; 
@@ -57,7 +72,7 @@ public class NetworkScanner implements Runnable{
     @Override
     public void run(){
         if (this.state == "ipscanner"){
-            Ping("192.168.0."+String.valueOf(lastBytesOfIp));
+            ScanPureJava("192.168.0.");
         } 
         else if (this.state == "portscanner"){
             try { 
@@ -103,59 +118,120 @@ public class NetworkScanner implements Runnable{
         Collections.sort(connected_devices, new Device()); 
     }
         
-    public void ScanPureJava(){
-        String ipAddress = "192.168.0.";
+    public void ScanPureJava(String ip){
+        String ipAddress = ip;
         ipAddress = ipAddress.substring(0, ipAddress.lastIndexOf('.')) + ".";
-        for (int i = 0; i < 256; i++) {
-            String otherAddress = ipAddress + String.valueOf(i);
-            try {
-                if (InetAddress.getByName(otherAddress).isReachable(50)) {
+        String otherAddress = ipAddress + String.valueOf(lastBytesOfIp);
+        try {
+            if (InetAddress.getByName(otherAddress).isReachable(50)) {
                     System.out.println(otherAddress);
-                }
-            } catch (UnknownHostException e) {
-                System.out.println(e.getMessage()); 
-            } catch (IOException e) {
-                System.out.println(e.getMessage()); 
+                    Device dev = new Device(otherAddress);
+                    connected_devices.add(dev); 
             }
+        } catch (UnknownHostException e) {
+                System.out.println(e.getMessage()); 
+        } catch (IOException e) {
+            System.out.println(e.getMessage()); 
+        }
+    }
+        
+    public void PrintConnectedDevices(){
+        connected_devices.forEach((d) -> {
+            System.out.println(d.getIp());
+    });
+    }
+        
+    public List<Device> getConnectedDevices(){
+        return connected_devices; 
+    }
+        
+    public void ScanPort(String ip, int port) throws UnknownHostException{
+        InetAddress ipAddress = InetAddress.getByName(ip);
+            
+        try {
+            Socket s = new Socket(); 
+            s.connect(new InetSocketAddress(ipAddress, port),50); 
+            open_ports.add(port);
+            System.out.println("Port " + port + " is open");
+        } 
+        catch (IOException ex) {
+        }
+            
+    }
+    
+    public Boolean ScanSSH(String ip) throws UnknownHostException{
+        
+        try{
+            ScanPort(ip, 22); 
+            return true; 
+        }
+        catch(IOException ex){
+            return false; 
+        }
+    }
+       
+    
+    public void ScanPortsFromList(String ip, List<Integer> ports) throws UnknownHostException{
+        for (Integer port: ports){
+            ScanPort(ip, port); 
         }
         
     }
-        
-        public void PrintConnectedDevices(){
-            connected_devices.forEach((d) -> {
-                System.out.println(d.getIp());
-        });
-        }
-        
-        public List<Device> getConnectedDevices(){
-            return connected_devices; 
-        }
-        
-        public void ScanPort(String ip, int port) throws UnknownHostException{
-            InetAddress ipAddress = InetAddress.getByName(ip);
-            
-                try {
-                    Socket s = new Socket(); 
-                    s.connect(new InetSocketAddress(ipAddress, port),50); 
-                    open_ports.add(port); 
-                    System.out.println("Port " + port + " is open");
-                } 
-                catch (IOException ex) {
-                }
-            
-        }
-       
-        public Boolean HasNoneOpenPorts(){
-            return open_ports.isEmpty(); 
-        }
-        
-        public List<Integer> getOpenPorts(){
-            return open_ports; 
-        }
-        
-    /**
-     * @param args the command line arguments
-     */
     
+    public void ClearOpenPorts(){
+        this.open_ports.clear(); 
+    }
+    
+    public void ScanFTP(String ip) throws UnknownHostException, IOException, IllegalStateException, FTPIllegalReplyException{
+        FTPClient client = new FTPClient();
+        try { 
+            client.connect(ip);
+            client.login("pi", "raspberry"); 
+            System.out.println("connected to ftp server on " + ip); 
+        } catch (FTPException ex) {
+            Logger.getLogger(NetworkScanner.class.getName()).log(Level.SEVERE, null, ex);
+            
+        }
+    }
+    
+    
+    public Boolean HasNoneOpenPorts(){
+        return open_ports.isEmpty(); 
+    }
+        
+    public List<Integer> getOpenPorts(){
+        return open_ports; 
+    }
+    
+    public void InitLocalHost() throws SocketException, UnknownHostException{
+        //read localhost into variable 
+        localHost = Inet4Address.getLocalHost(); 
+        NetworkInterface networkInterface = NetworkInterface.getByInetAddress(localHost); 
+        networkPrefixLenght = networkInterface.getInterfaceAddresses().get(0).getNetworkPrefixLength(); 
+        if (networkPrefixLenght == 24){
+            subnetMask = "255.255.255"; 
+        }
+        else{
+            //too many IPs to scan
+        }
+        
+    }
+    
+    public String getSubnetMask(){
+        return subnetMask; 
+    }
+    
+    public InetAddress getLocalHost(){
+        return localHost; 
+    }
+    
+    public static void StripLocalHost() throws UnknownHostException{
+         InetAddress lh = Inet4Address.getLocalHost(); 
+         System.out.println(lh.getByAddress(lh.getAddress())); 
+    }
+    
+    public static void main(String[]args) throws UnknownHostException{
+        StripLocalHost(); 
+    }
     
 }

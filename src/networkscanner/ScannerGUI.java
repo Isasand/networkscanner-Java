@@ -4,6 +4,9 @@
  * and open the template in the editor.
  */
 package networkscanner;
+import it.sauronsoftware.ftp4j.FTPIllegalReplyException;
+import java.io.IOException;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -41,6 +44,11 @@ public class ScannerGUI extends javax.swing.JFrame {
         connectedDevicesArea = new javax.swing.JTextArea();
         jScrollPane4 = new javax.swing.JScrollPane();
         openPortsArea = new javax.swing.JTextArea();
+        ftpButton = new javax.swing.JButton();
+        jButton2 = new javax.swing.JButton();
+        sshButton = new javax.swing.JButton();
+        httpButton = new javax.swing.JButton();
+        inputHostField = new javax.swing.JTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Network scanner");
@@ -74,6 +82,35 @@ public class ScannerGUI extends javax.swing.JFrame {
         openPortsArea.setRows(5);
         jScrollPane4.setViewportView(openPortsArea);
 
+        ftpButton.setText("SCAN FOR FTP");
+        ftpButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                ftpButtonActionPerformed(evt);
+            }
+        });
+
+        jButton2.setText("LOGIN");
+
+        sshButton.setText("SCAN FOR SSH");
+        sshButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                sshButtonActionPerformed(evt);
+            }
+        });
+
+        httpButton.setText("SCAN FOR HTTP");
+        httpButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                httpButtonActionPerformed(evt);
+            }
+        });
+
+        inputHostField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                inputHostFieldActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -82,30 +119,52 @@ public class ScannerGUI extends javax.swing.JFrame {
                 .addGap(12, 12, 12)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(scanButton, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(81, 81, 81)
+                        .addComponent(scanButton)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(inputHostField, javax.swing.GroupLayout.PREFERRED_SIZE, 104, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(hostCombobox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(portScanButton))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(portScanButton, javax.swing.GroupLayout.PREFERRED_SIZE, 115, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 238, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 238, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(httpButton)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(ftpButton, javax.swing.GroupLayout.PREFERRED_SIZE, 121, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(sshButton, javax.swing.GroupLayout.PREFERRED_SIZE, 121, javax.swing.GroupLayout.PREFERRED_SIZE))))
                 .addContainerGap(11, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addGap(14, 14, 14)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(hostCombobox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(portScanButton)
-                    .addComponent(scanButton))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(hostCombobox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(portScanButton))
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(scanButton, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(inputHostField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 301, Short.MAX_VALUE)
-                    .addComponent(jScrollPane4))
-                .addContainerGap(22, Short.MAX_VALUE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 145, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(httpButton)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(ftpButton)
+                            .addComponent(jButton2))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(sshButton)
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addComponent(jScrollPane3))
+                .addGap(37, 37, 37))
         );
 
         pack();
@@ -147,7 +206,7 @@ public class ScannerGUI extends javax.swing.JFrame {
     }//GEN-LAST:event_scanButtonActionPerformed
 
     private void portScanButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_portScanButtonActionPerformed
-   
+        sc.ClearOpenPorts();
         openPortsArea.setText(""); 
         threads.clear();
         String ip = hostCombobox.getItemAt(hostCombobox.getSelectedIndex());
@@ -189,6 +248,42 @@ public class ScannerGUI extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_hostComboboxActionPerformed
 
+    private void sshButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_sshButtonActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_sshButtonActionPerformed
+
+    private void httpButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_httpButtonActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_httpButtonActionPerformed
+
+    private void ftpButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ftpButtonActionPerformed
+        sc.ClearOpenPorts(); 
+        openPortsArea.setText(""); 
+        String ip = hostCombobox.getItemAt(hostCombobox.getSelectedIndex());
+        openPortsArea.setText("Scanning FTP port for ip \n" + ip);
+        try {
+            sc.ScanFTP(ip);
+            openPortsArea.setText("Connected to ftp server on " + ip); 
+        } catch (UnknownHostException ex) {
+            Logger.getLogger(ScannerGUI.class.getName()).log(Level.SEVERE, null, ex);
+            openPortsArea.setText("No FTP server on ip " + ip); 
+        } catch (IOException ex) {
+            Logger.getLogger(ScannerGUI.class.getName()).log(Level.SEVERE, null, ex);
+            openPortsArea.setText("No FTP server on ip " + ip); 
+        } catch (IllegalStateException ex) {
+            Logger.getLogger(ScannerGUI.class.getName()).log(Level.SEVERE, null, ex);
+            openPortsArea.setText("No FTP server on ip " + ip); 
+        } catch (FTPIllegalReplyException ex) {
+            Logger.getLogger(ScannerGUI.class.getName()).log(Level.SEVERE, null, ex);
+            openPortsArea.setText("No FTP server on ip " + ip); 
+        }
+        
+    }//GEN-LAST:event_ftpButtonActionPerformed
+
+    private void inputHostFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_inputHostFieldActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_inputHostFieldActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -227,12 +322,17 @@ public class ScannerGUI extends javax.swing.JFrame {
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTextArea connectedDevicesArea;
+    private javax.swing.JButton ftpButton;
     private javax.swing.JComboBox<String> hostCombobox;
+    private javax.swing.JButton httpButton;
+    private javax.swing.JTextField inputHostField;
+    private javax.swing.JButton jButton2;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JScrollPane jScrollPane4;
     private javax.swing.JTextArea openPortsArea;
     private javax.swing.JButton portScanButton;
     private javax.swing.JButton scanButton;
+    private javax.swing.JButton sshButton;
     // End of variables declaration//GEN-END:variables
     String state = "closed"; 
     List<Thread> threads = new ArrayList<>(); 
