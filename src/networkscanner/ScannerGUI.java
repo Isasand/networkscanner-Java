@@ -4,8 +4,12 @@
  * and open the template in the editor.
  */
 package networkscanner;
+import it.sauronsoftware.ftp4j.FTPAbortedException;
+import it.sauronsoftware.ftp4j.FTPDataTransferException;
 import it.sauronsoftware.ftp4j.FTPException;
+import it.sauronsoftware.ftp4j.FTPFile;
 import it.sauronsoftware.ftp4j.FTPIllegalReplyException;
+import it.sauronsoftware.ftp4j.FTPListParseException;
 import java.io.IOException;
 import java.net.SocketException;
 import java.net.UnknownHostException;
@@ -13,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JOptionPane;
 import networkscanner.NetworkScanner; 
 import networkscanner.Device; 
 /**
@@ -46,6 +51,7 @@ public class ScannerGUI extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jMenuItem1 = new javax.swing.JMenuItem();
         scanButton = new javax.swing.JButton();
         hostCombobox = new javax.swing.JComboBox<>();
         portScanButton = new javax.swing.JButton();
@@ -59,6 +65,22 @@ public class ScannerGUI extends javax.swing.JFrame {
         httpButton = new javax.swing.JButton();
         usernameField = new javax.swing.JTextField();
         passwordField = new javax.swing.JTextField();
+        hostInputField = new javax.swing.JTextField();
+        jMenuBar1 = new javax.swing.JMenuBar();
+        jMenu1 = new javax.swing.JMenu();
+        jMenuItem3 = new javax.swing.JMenuItem();
+        jSeparator2 = new javax.swing.JPopupMenu.Separator();
+        jMenuItem5 = new javax.swing.JMenuItem();
+        jSeparator3 = new javax.swing.JPopupMenu.Separator();
+        jMenuItem6 = new javax.swing.JMenuItem();
+        jMenu3 = new javax.swing.JMenu();
+        changeHostOption = new javax.swing.JMenuItem();
+        jSeparator1 = new javax.swing.JPopupMenu.Separator();
+        statusOption = new javax.swing.JMenuItem();
+        jSeparator4 = new javax.swing.JPopupMenu.Separator();
+        resetHostOption = new javax.swing.JMenuItem();
+
+        jMenuItem1.setText("jMenuItem1");
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Network scanner");
@@ -120,6 +142,63 @@ public class ScannerGUI extends javax.swing.JFrame {
             }
         });
 
+        jMenu1.setText("File");
+
+        jMenuItem3.setText("Open");
+        jMenu1.add(jMenuItem3);
+        jMenu1.add(jSeparator2);
+
+        jMenuItem5.setText("Delete");
+        jMenu1.add(jMenuItem5);
+        jMenu1.add(jSeparator3);
+
+        jMenuItem6.setText("Rename");
+        jMenuItem6.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem6ActionPerformed(evt);
+            }
+        });
+        jMenu1.add(jMenuItem6);
+
+        jMenuBar1.add(jMenu1);
+
+        jMenu3.setText("Options");
+        jMenu3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenu3ActionPerformed(evt);
+            }
+        });
+
+        changeHostOption.setText("Change host");
+        changeHostOption.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                changeHostOptionActionPerformed(evt);
+            }
+        });
+        jMenu3.add(changeHostOption);
+        jMenu3.add(jSeparator1);
+
+        statusOption.setText("Status");
+        statusOption.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                statusOptionActionPerformed(evt);
+            }
+        });
+        jMenu3.add(statusOption);
+        jMenu3.add(jSeparator4);
+
+        resetHostOption.setText("Reset host");
+        resetHostOption.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                resetHostOptionActionPerformed(evt);
+            }
+        });
+        jMenu3.add(resetHostOption);
+
+        jMenuBar1.add(jMenu3);
+
+        setJMenuBar(jMenuBar1);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -129,10 +208,12 @@ public class ScannerGUI extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(scanButton)
-                        .addGap(116, 116, 116)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(hostInputField, javax.swing.GroupLayout.PREFERRED_SIZE, 104, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(hostCombobox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(portScanButton, javax.swing.GroupLayout.PREFERRED_SIZE, 115, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(portScanButton, javax.swing.GroupLayout.PREFERRED_SIZE, 122, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 238, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -161,7 +242,9 @@ public class ScannerGUI extends javax.swing.JFrame {
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(hostCombobox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(portScanButton))
-                    .addComponent(scanButton, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(scanButton, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(hostInputField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
@@ -199,7 +282,6 @@ public class ScannerGUI extends javax.swing.JFrame {
         
         for (Thread thread: threads){
             thread.start();
-            
         }
         
         for(Thread th:threads){
@@ -211,9 +293,10 @@ public class ScannerGUI extends javax.swing.JFrame {
         }
         
         sc.PrintConnectedDevices();
-        
+        threads.clear(); 
         sc.SortConnectedDevices(); 
         List<Device> connected = sc.getConnectedDevices(); 
+        connectedDevicesArea.append("You are " + sc.getLocalHost() + "\n"); 
         connectedDevicesArea.append("Connected devices:\n"); 
         hostCombobox.removeAllItems();
         for(Device dev: connected){
@@ -223,15 +306,21 @@ public class ScannerGUI extends javax.swing.JFrame {
     }//GEN-LAST:event_scanButtonActionPerformed
 
     private void portScanButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_portScanButtonActionPerformed
+        
+        //String ip = hostInputField.getText(); 
+        //if(hostInputField.getText().equals("")){
+        String ip = hostCombobox.getItemAt(hostCombobox.getSelectedIndex());
+        //}
+        
         sc.ClearOpenPorts();
         openPortsArea.setText(""); 
         threads.clear();
-        String ip = hostCombobox.getItemAt(hostCombobox.getSelectedIndex());
+        
         openPortsArea.setText("Scanning ports for ip \n" + ip);
         sc.setIpToScan(ip); 
         sc.ChangeState("portscanner"); 
         
-        for(int i = 1; i<1024; i++){
+        for(int i = 1; i<=6000; i++){
             threads.add(new Thread(new NetworkScanner(0, sc.getIpToScan(), i))); 
         }
         
@@ -245,8 +334,9 @@ public class ScannerGUI extends javax.swing.JFrame {
             } catch (InterruptedException ex) {
                 Logger.getLogger(ScannerGUI.class.getName()).log(Level.SEVERE, null, ex);
             }
+           
         }
-        
+        threads.clear(); 
         if (sc.HasNoneOpenPorts()){
             openPortsArea.append("\nDevice has no open ports"); 
         }
@@ -284,20 +374,9 @@ public class ScannerGUI extends javax.swing.JFrame {
             openPortsArea.setText("Found FTP server on " + ip + "\nInput credentials to login"); 
             sc.client.disconnect(true);
             
-        } catch (UnknownHostException ex) {
+        } catch (Exception ex) {
             Logger.getLogger(ScannerGUI.class.getName()).log(Level.SEVERE, null, ex);
             openPortsArea.setText("No FTP server on ip " + ip); 
-        } catch (IOException ex) {
-            Logger.getLogger(ScannerGUI.class.getName()).log(Level.SEVERE, null, ex);
-            openPortsArea.setText("No FTP server on ip " + ip); 
-        } catch (IllegalStateException ex) {
-            Logger.getLogger(ScannerGUI.class.getName()).log(Level.SEVERE, null, ex);
-            openPortsArea.setText("No FTP server on ip " + ip); 
-        } catch (FTPIllegalReplyException ex) {
-            Logger.getLogger(ScannerGUI.class.getName()).log(Level.SEVERE, null, ex);
-            openPortsArea.setText("No FTP server on ip " + ip); 
-        } catch (FTPException ex) {
-            Logger.getLogger(ScannerGUI.class.getName()).log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_ftpButtonActionPerformed
 
@@ -311,23 +390,66 @@ public class ScannerGUI extends javax.swing.JFrame {
                 sc.client.connect(ip); 
                 sc.client.login(usr, pass);
                 openPortsArea.setText("Succesfully connected to FTP server on  \n"+ ip);
+                FTPFile[] list = sc.client.list();
+                connectedDevicesArea.setText("Files on FTP server:\n\n"); 
+                for (FTPFile file : list){
+                    connectedDevicesArea.append(file.getName()+"\n");  
+                }
+                
             }
             else if (loginButton.getText().equals("DISCONNECT")){
                 loginButton.setText("LOGIN"); 
                 sc.client.disconnect(true); 
                 openPortsArea.append("\nDisconnected"); 
                 //set to false if we want to break connection without sending any advice to the server
+                connectedDevicesArea.setText(""); 
+                connectedDevicesArea.append("Connected devices:\n"); 
+                for(Device dev: sc.getConnectedDevices()){
+                    connectedDevicesArea.append(dev.getIp()+"\n"); 
+                    hostCombobox.addItem(dev.getIp()); 
+                }
             }
-        } catch (IllegalStateException ex) {
+        } catch (Exception ex) {
             Logger.getLogger(ScannerGUI.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
-            Logger.getLogger(ScannerGUI.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (FTPIllegalReplyException ex) {
-            Logger.getLogger(ScannerGUI.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (FTPException ex) {
-            Logger.getLogger(ScannerGUI.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        } 
     }//GEN-LAST:event_loginButtonActionPerformed
+
+    private void jMenu3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenu3ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jMenu3ActionPerformed
+
+    private void jMenuItem6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem6ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jMenuItem6ActionPerformed
+
+    private void changeHostOptionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_changeHostOptionActionPerformed
+        String ip = JOptionPane.showInputDialog(null, "input host (default localhost)");
+        sc.setIpToScan(ip); 
+    }//GEN-LAST:event_changeHostOptionActionPerformed
+
+    private void statusOptionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_statusOptionActionPerformed
+        String text = "Localhost: " + sc.getLocalHost(); 
+        String ip = sc.getIpToScan();  
+        if(ip==null || ip ==sc.getLocalHost().getHostAddress()){
+            ip = "localhost"; 
+        }
+        text += "\nSubnetmask: "+ sc.getSubnetMask(); 
+        text +="\nHost to scan: " + ip; 
+        List<Integer> openPorts = sc.getOpenPorts(); 
+        text += "\nOpen ports :"; 
+        if (sc.HasNoneOpenPorts()){
+            text+="None"; 
+        }
+        for (Integer port: openPorts){
+            text += "\n" + port.toString(); 
+        }
+        JOptionPane.showMessageDialog(this,text);
+    }//GEN-LAST:event_statusOptionActionPerformed
+
+    private void resetHostOptionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_resetHostOptionActionPerformed
+        sc.setIpToScan(sc.getLocalHost().getHostAddress());
+        sc.ClearOpenPorts(); 
+    }//GEN-LAST:event_resetHostOptionActionPerformed
 
     /**
      * @param args the command line arguments
@@ -366,18 +488,33 @@ public class ScannerGUI extends javax.swing.JFrame {
     
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JMenuItem changeHostOption;
     private javax.swing.JTextArea connectedDevicesArea;
     private javax.swing.JButton ftpButton;
     private javax.swing.JComboBox<String> hostCombobox;
+    private javax.swing.JTextField hostInputField;
     private javax.swing.JButton httpButton;
+    private javax.swing.JMenu jMenu1;
+    private javax.swing.JMenu jMenu3;
+    private javax.swing.JMenuBar jMenuBar1;
+    private javax.swing.JMenuItem jMenuItem1;
+    private javax.swing.JMenuItem jMenuItem3;
+    private javax.swing.JMenuItem jMenuItem5;
+    private javax.swing.JMenuItem jMenuItem6;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JScrollPane jScrollPane4;
+    private javax.swing.JPopupMenu.Separator jSeparator1;
+    private javax.swing.JPopupMenu.Separator jSeparator2;
+    private javax.swing.JPopupMenu.Separator jSeparator3;
+    private javax.swing.JPopupMenu.Separator jSeparator4;
     private javax.swing.JButton loginButton;
     private javax.swing.JTextArea openPortsArea;
     private javax.swing.JTextField passwordField;
     private javax.swing.JButton portScanButton;
+    private javax.swing.JMenuItem resetHostOption;
     private javax.swing.JButton scanButton;
     private javax.swing.JButton sshButton;
+    private javax.swing.JMenuItem statusOption;
     private javax.swing.JTextField usernameField;
     // End of variables declaration//GEN-END:variables
     String state = "closed"; 

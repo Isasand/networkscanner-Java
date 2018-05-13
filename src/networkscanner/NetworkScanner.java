@@ -9,7 +9,6 @@ import it.sauronsoftware.ftp4j.FTPAbortedException;
 import it.sauronsoftware.ftp4j.FTPClient;
 import it.sauronsoftware.ftp4j.FTPDataTransferException;
 import it.sauronsoftware.ftp4j.FTPException;
-import it.sauronsoftware.ftp4j.FTPFile;
 import it.sauronsoftware.ftp4j.FTPIllegalReplyException;
 import it.sauronsoftware.ftp4j.FTPListParseException;
 import java.io.BufferedReader;
@@ -191,30 +190,12 @@ public class NetworkScanner implements Runnable{
        
         try { 
             client.connect(ip);
-            //client.login("user", "password"); 
             System.out.println("found ftp server on " + ip); 
         } catch (FTPException ex) {
             Logger.getLogger(NetworkScanner.class.getName()).log(Level.SEVERE, null, ex);
             
         }
     }
-    
-   /* public void LoginFTP(String usr, String pass, String ip) throws IllegalStateException, IOException, FTPIllegalReplyException, FTPException{
-        FTPClient client = new FTPClient();
-        client.connect(ip);
-        client.login(usr, ip);
-        try {
-            FTPFile[] list = client.list();
-        } catch (FTPDataTransferException ex) {
-            Logger.getLogger(NetworkScanner.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (FTPAbortedException ex) {
-            Logger.getLogger(NetworkScanner.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (FTPListParseException ex) {
-            Logger.getLogger(NetworkScanner.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-    */
-    
     public Boolean HasNoneOpenPorts(){
         return open_ports.isEmpty(); 
     }
@@ -243,6 +224,10 @@ public class NetworkScanner implements Runnable{
     
     public InetAddress getLocalHost(){
         return localHost; 
+    }
+    
+    public void setLocalHost() throws UnknownHostException{
+        localHost = Inet4Address.getLocalHost();
     }
     
     public void StripLocalHost() throws UnknownHostException{
