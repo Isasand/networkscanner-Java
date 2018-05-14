@@ -376,6 +376,7 @@ public class ScannerGUI extends javax.swing.JFrame {
             sc.client.connect(ip); 
             openPortsArea.setText("Found FTP server on " + ip + "\nInput credentials to login"); 
             sc.client.disconnect(true);
+            loginState = "FTP"; 
             
         } catch (Exception ex) {
             Logger.getLogger(ScannerGUI.class.getName()).log(Level.SEVERE, null, ex);
@@ -428,18 +429,22 @@ public class ScannerGUI extends javax.swing.JFrame {
     private void changeHostOptionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_changeHostOptionActionPerformed
         String ip = JOptionPane.showInputDialog(null, "input host (default localhost)");
         sc.setIpToScan(ip); 
+        hostCombobox.removeAllItems(); 
+        hostCombobox.addItem(ip);
+        scanButton.setEnabled(false);
+        connectedDevicesArea.setText(""); 
     }//GEN-LAST:event_changeHostOptionActionPerformed
 
     private void statusOptionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_statusOptionActionPerformed
         String text = "Localhost: " + sc.getLocalHost(); 
         String ip = sc.getIpToScan();  
-        if(ip==null || ip ==sc.getLocalHost().getHostAddress()){
-            ip = "localhost"; 
+        if(ip==null){
+            ip = sc.getLocalHost().getHostAddress(); 
         }
         text += "\nSubnetmask: "+ sc.getSubnetMask(); 
         text +="\nHost to scan: " + ip; 
         List<Integer> openPorts = sc.getOpenPorts(); 
-        text += "\nOpen ports :"; 
+        text += "\nOpen ports : "; 
         if (sc.HasNoneOpenPorts()){
             text+="None"; 
         }
@@ -452,6 +457,8 @@ public class ScannerGUI extends javax.swing.JFrame {
     private void resetHostOptionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_resetHostOptionActionPerformed
         sc.setIpToScan(sc.getLocalHost().getHostAddress());
         sc.ClearOpenPorts(); 
+        scanButton.setEnabled(true); 
+        hostCombobox.removeAllItems(); 
     }//GEN-LAST:event_resetHostOptionActionPerformed
 
     /**
@@ -520,7 +527,8 @@ public class ScannerGUI extends javax.swing.JFrame {
     private javax.swing.JMenuItem statusOption;
     private javax.swing.JTextField usernameField;
     // End of variables declaration//GEN-END:variables
-    String state = "closed"; 
+    private String loginState = ""; 
     List<Thread> threads = new ArrayList<>(); 
     NetworkScanner sc = new NetworkScanner(0, null, 0); 
+    
 }

@@ -28,7 +28,6 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 /**
  *
  * @author Isa
@@ -45,7 +44,6 @@ public class NetworkScanner implements Runnable{
     static String subnetMask; 
     static String ip_prefix_to_scan; 
     static String networkName; 
-    
     int lastBytesOfIp; 
     int port; 
     
@@ -206,6 +204,7 @@ public class NetworkScanner implements Runnable{
             
         }
     }
+    
     public Boolean HasNoneOpenPorts(){
         return open_ports.isEmpty(); 
     }
@@ -247,6 +246,8 @@ public class NetworkScanner implements Runnable{
     }
     
     public static void main(String[] args) throws IOException{
-        
+       
+        InetAddress ia = Inet4Address.getLocalHost(); 
+        System.out.println(ia.getHostAddress()); 
     }
 }
