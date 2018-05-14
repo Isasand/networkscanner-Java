@@ -37,7 +37,7 @@ public class NetworkScanner implements Runnable{
     static public FTPClient client = new FTPClient();
     static private List<Device> connected_devices = new ArrayList<>(); 
     static private List<Integer> open_ports = new ArrayList<>(); 
-    
+    static int maxPorts = 2000; 
     static String state = "ipscanner"; 
     static String ip_to_scan; 
     static int networkPrefixLenght; 
@@ -55,6 +55,15 @@ public class NetworkScanner implements Runnable{
         this.lastBytesOfIp = var; 
         this.ip_to_scan = ip; 
         this.port = port; 
+    }
+    
+    
+    public int getMaxPorts(){
+        return this.maxPorts; 
+    }
+    
+    public void setMaxPorts(int maxPorts){
+        this.maxPorts = maxPorts; 
     }
     
     public String getIpToScan(){
@@ -83,6 +92,7 @@ public class NetworkScanner implements Runnable{
                 ScanPort(this.ip_to_scan, this.port);
             } catch (UnknownHostException ex) {
                 Logger.getLogger(NetworkScanner.class.getName()).log(Level.SEVERE, null, ex);
+                System.out.println("Exception in function run() in NetworkScanner:\n" + ex.getMessage()); 
             }
         }
     }
@@ -113,8 +123,7 @@ public class NetworkScanner implements Runnable{
             }
         }
         catch (IOException e) {
-            System.out.println("Error sending ping");
-            System.out.println(e.getMessage()); 
+            System.out.println("Exception in function Ping(String ip) in NetworkScanner:\n" + e.getMessage()); 
         }
     }
         
@@ -132,11 +141,9 @@ public class NetworkScanner implements Runnable{
                     Device dev = new Device(otherAddress);
                     connected_devices.add(dev); 
             }
-        } catch (UnknownHostException e) {
-                System.out.println(e.getMessage()); 
-        } catch (IOException e) {
-            System.out.println(e.getMessage()); 
-        }
+        } catch (Exception e) {
+            System.out.println("Exception in function ScanPureJava(String ip) in NetworkScanner:\n" + e.getMessage()); 
+        } 
     }
         
     public void PrintConnectedDevices(){
@@ -158,7 +165,8 @@ public class NetworkScanner implements Runnable{
             open_ports.add(port);
             System.out.println("Port " + port + " is open");
         } 
-        catch (IOException ex) {
+        catch (IOException e) {
+            System.out.println("Exception in function ScanPort(String ip, int port) in NetworkScanner:\n" + e.getMessage()); 
         }
             
     }
@@ -169,7 +177,8 @@ public class NetworkScanner implements Runnable{
             ScanPort(ip, 22); 
             return true; 
         }
-        catch(IOException ex){
+        catch(IOException e){
+            System.out.println("Exception in function ScanSSH(String ip) in NetworkScanner:\n" + e.getMessage()); 
             return false; 
         }
     }
@@ -191,8 +200,9 @@ public class NetworkScanner implements Runnable{
         try { 
             client.connect(ip);
             System.out.println("found ftp server on " + ip); 
-        } catch (FTPException ex) {
-            Logger.getLogger(NetworkScanner.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (FTPException e) {
+            System.out.println("Exception in function ScanFTP(String ip) in NetworkScanner:\n" + e.getMessage()); 
+            Logger.getLogger(NetworkScanner.class.getName()).log(Level.SEVERE, null, e);
             
         }
     }
@@ -213,7 +223,7 @@ public class NetworkScanner implements Runnable{
             subnetMask = "255.255.255"; 
         }
         else{
-            System.out.println("too many IPs to scan"); 
+            System.out.println("too many IPs to scan");  
         }
         StripLocalHost(); 
     }
